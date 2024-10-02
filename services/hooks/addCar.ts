@@ -5,7 +5,7 @@ const addCar = async (car: Omit<Cars, 'id'>): Promise<void> => {
   const dbRef = ref(db, '/');
   try {
     await push(dbRef, car);
-    console.log('Car added successfully');
+    console.log('Car added successfully' , car);
   } catch (error) {
     console.error('Error adding car:', error);
     throw error;

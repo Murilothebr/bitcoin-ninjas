@@ -1,12 +1,9 @@
 import { View, Text, Button, StyleSheet } from 'react-native'
-import HeaderWithTitle from '../components/headers/Header'
 import { Card } from 'react-native-paper'
 
 export default function about() {
   return (
     <View style={styles.container}>
-      <HeaderWithTitle title="Sobre o aplicativo TopCar" actionSheetOptions={['Cancel', 'Home', 'Logout']} HideThisPage={true} />
-
       <Card style={styles.card}>
 
         <Text style={styles.boldText}>

@@ -1,97 +1,277 @@
-import { StyleSheet } from "react-native";
-import React, { useState } from "react";
-import { Link, useRouter } from "expo-router";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  SectionList,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  Button,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
+import addCar from "@/services/hooks/addCar";
+import getCars from "@/services/hooks/getCars";
+import deleteCars from "@/services/hooks/deleteCar";
+import updateCar from "@/services/hooks/editarCar";
+import organizeCarsIntoSections from "@/services/carsService";
+import { FontAwesome, AntDesign } from "@expo/vector-icons";
 import FormInput from "@/components/form/FormInput";
-import FormButton from "@/components/form/FormButton";
-import { Spacing } from "@/consts/spacing";
-import FullScreen from "@/components/containers/FullScreen";
-import { Image } from 'expo-image';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import FormButtonCancel from "@/components/form/FormButtonCancel";
 import FormButtonCreate from "@/components/form/FormButtonCreate";
 
-export default function Login() {
-  const router = useRouter();
+export default function index() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [cars, setCars] = useState<any[]>([]);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [newCar, setNewCar] = useState<Omit<Cars, "id">>({
+    brand: "",
+    price: "",
+    model: "",
+    year: "",
+  });
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [currentCar, setCurrentCar] = useState<
+    Omit<Cars, "id"> & { id?: number }
+  >({ brand: "", price: "", model: "", year: "" });
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const onChangeSearch = (query: any) => {
+    setSearchQuery(query);
+  };
 
-  const handleLogin = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      setMessage('User logged in successfully');
-
-      router.replace("/home");
-    } catch (error: any) {
-      let errorMessage = 'An error occurred';
-      if (error.code === 'auth/user-not-found') {
-        errorMessage = 'No user found with this email';
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage = 'Incorrect password';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Invalid email address';
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        const carsData = await getCars();
+        setCars(carsData);
+      } catch (error) {
+        console.error("Failed to fetch cars data:", error);
       }
-      setMessage(errorMessage);
+    };
+
+    fetchCars();
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteCars(id);
+      setCars(cars.filter((car) => car.id !== id));
+    } catch (error) {
+      console.error("Failed to delete car:", error);
     }
   };
 
-  const blurhash =
-    '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
+  const handleAddCar = async () => {
+    try {
+      await addCar(newCar);
+      setModalVisible(false);
+      setNewCar({ brand: "", price: "", model: "", year: "" });
+      const carsData = await getCars();
+      setCars(carsData);
+    } catch (error) {
+      console.error("Failed to add car:", error);
+    }
+  };
+
+  const handleEditCar = async () => {
+    try {
+      if (currentCar.id) {
+        await updateCar(currentCar as Cars);
+        setModalVisible(false);
+        setCurrentCar({ brand: "", model: "", year: "", price: "" });
+        const carsData = await getCars();
+        setCars(carsData);
+      }
+    } catch (error) {
+      console.error("Failed to edit car:", error);
+    }
+  };
+
+  const openEditModal = (car: Cars) => {
+    setCurrentCar(car);
+    setEditMode(true);
+    setModalVisible(true);
+  };
 
   return (
-    <FullScreen>
+    <View style={styles.view}>
+      <SafeAreaView style={styles.container}>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Cade..."
+          onChangeText={onChangeSearch}
+          value={searchQuery}
+          placeholderTextColor="black"
+        />
 
-      <Image
-        source={{ uri: "https://www.lojacarros.com.br/static/images/loja-carros.png" }}
-        style={styles.logo}
-        placeholder={blurhash}
-      />
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={styles.addButton}
+        >
+          <AntDesign name="pluscircle" size={50} color="green" />
+        </TouchableOpacity>
 
-      <FormInput
-        label="Username"
-        value={email}
-        onChangeText={setEmail}
-      />
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.modalView}>
+              <FormInput
+                label="Marca"
+                value={currentCar.brand}
+                onChangeText={(text) =>
+                  setCurrentCar({ ...currentCar, brand: text })
+                }
+              />
+              <FormInput
+                label="Modelo"
+                value={currentCar.model}
+                onChangeText={(text) =>
+                  setCurrentCar({ ...currentCar, model: text })
+                }
+              />
+              <FormInput
+                label="Preço (Mil / BRL)"
+                value={currentCar.price}
+                onChangeText={(text) =>
+                  setCurrentCar({ ...currentCar, price: text })
+                }
+              />
+              <FormInput
+                label="Ano fabricação"
+                value={currentCar.year.toString()}
+                onChangeText={(text) =>
+                  setCurrentCar({ ...currentCar, year: text })
+                }
+              />
 
-      <FormInput
-        label="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
-      <FormButtonCreate onPress={handleLogin} title="Login!" />
-
-      <Link style={styles.registerLink} href="/register">
-        Novo por aqui? Registre-se!
-      </Link>
-
-    </FullScreen>
+              <View style={styles.buttonContainer}>
+                <FormButtonCreate
+                  title={editMode ? "Edit Car" : "Add Car"}
+                  onPress={editMode ? handleEditCar : handleAddCar}
+                />
+                <FormButtonCancel
+                  title="Cancel"
+                  onPress={() => setModalVisible(false)}
+                />
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+        
+        <SectionList
+          sections={organizeCarsIntoSections(cars).filter((data) =>
+            data.title.toUpperCase().includes(searchQuery.toUpperCase())
+          )}
+          renderItem={({ item }) => (
+            <View style={styles.item}>
+              <Text style={styles.model}>{item.model}</Text>
+              <Text style={styles.carPrice}>{item.price},000R$</Text>
+              <Text style={styles.year}>{item.year}</Text>
+              <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                <FontAwesome name="trash" size={15} color="red" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => openEditModal(item)}
+                style={styles.editButton}
+              >
+                <FontAwesome name="pencil" size={15} color="gray" />
+              </TouchableOpacity>
+            </View>
+          )}
+          renderSectionHeader={({ section: { title } }) => (
+            <Text style={styles.header}>{title}</Text>
+          )}
+        />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-
-  imageContainer: {
-    justifyContent: 'center',
-    alignContent: 'center',
+  container: {
+    backgroundColor: "white",
   },
-  logo: {
-    width: 200,
-    height: 150,
-    marginBottom: Spacing.md,
-    alignSelf: "center",
+  view: {
+    backgroundColor: "white",
   },
-  image: {
-    flex: 1,
-    width: '100%',
-    height: 10,
-    backgroundColor: '#0553',
+  searchBar: {
+    padding: 10,
+    backgroundColor: "white",
+    margin: 10,
+    borderRadius: 5,
+    color: "black",
+    borderWidth: 1,
+    borderColor: "gray",
   },
-  registerLink: {
-    marginTop: Spacing.md,
+  item: {
+    alignItems: "center",
+  },
+  header: {
+    fontSize: 40,
+    textAlign: "center",
+    fontWeight: "bold",
+    padding: 20,
+  },
+  model: {
+    fontSize: 30,
+    textAlign: "center",
+  },
+  carPrice: {
+    fontSize: 20,
+    textAlign: "center",
+    color: "lightgreen",
+    fontWeight: "bold",
+  },
+  year: {
     fontSize: 12,
     textAlign: "center",
-  }
+    color: "gray",
+  },
+  carId: {
+    fontSize: 10,
+    textAlign: "center",
+    color: "lightgray",
+  },
+  deleteButton: {
+    color: "red",
+  },
+  addButton: {
+    marginTop: 15,
+    alignSelf: "center",
+  },
+  modalView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+    backgroundColor: "white",
+    padding: 35,
+    shadowColor: "white",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  editButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 15,
+    width: "80%",
+  },
 });

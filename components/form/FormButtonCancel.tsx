@@ -25,14 +25,17 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 10,
     padding: 10,
-    marginTop: 15
+    marginTop: 15,
+    borderWidth: 0.5,      
+    borderRadius: 10,
+    borderColor: "red"
   },
   title: {
     color: "red",
     textAlign: "center",
-    fontSize: 20
+    fontSize: 25,
+    fontWeight: "bold",
   },
   buttonImage: {
     width: 200,

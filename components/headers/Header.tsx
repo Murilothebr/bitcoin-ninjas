@@ -1,4 +1,3 @@
-import React from "react";
 import { TouchableOpacity, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ActionSheetIOS } from "react-native";
@@ -24,7 +23,7 @@ const HeaderWithTitle = ({ title, actionSheetOptions, HideThisPage }: HeaderWith
           // Cancel button action
         } else if (buttonIndex === 1) {
           if (HideThisPage) {
-            router.push(`/home`);
+            router.push(`/`);
           } else {
             router.push(`/about`);
           }
