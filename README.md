@@ -173,3 +173,4 @@ Armazena informações sobre prestadores de serviços individuais ou empresas qu
 # PR 02
 
 # Meu projeto já tem outros pacotes e algumas configuraçoes, ste-by-step de como rodar, então acho que ja se aplica.
+
