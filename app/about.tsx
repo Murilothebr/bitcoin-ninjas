@@ -7,7 +7,7 @@ export default function about() {
       <Card style={styles.card}>
 
         <Text style={styles.boldText}>
-          Top Car
+          Bitcoin Ninjas
         </Text>
 
         <Text style={styles.boldText}>
@@ -19,7 +19,7 @@ export default function about() {
         </Text>
 
         <Text style={styles.text}>
-          https://github.com/Murilothebr/pdm-firebase
+        https://github.com/Murilothebr/bitcoin-ninjas/
         </Text>
       </Card>
     </View>
