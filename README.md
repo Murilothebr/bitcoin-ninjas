@@ -166,7 +166,6 @@ Armazena informações sobre prestadores de serviços individuais ou empresas qu
       - `startTime`: timestamp
       - `endTime`: timestamp
 
-# PR 01
 
 ## Como o projeto ja tem o codigo que eu comecei, com template do expo, eu só vou mudar o README, ok professor?
 
