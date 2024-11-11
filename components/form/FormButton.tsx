@@ -1,12 +1,8 @@
-import { Colors } from "@/consts/colors";
-import { Spacing } from "@/consts/spacing";
-import React from "react";
 import {
   StyleSheet,
   Text,
   TouchableOpacity,
   TouchableOpacityProps,
-  Image
 } from "react-native";
 
 type FormInput = {
@@ -27,12 +23,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 10,
     padding: 10,
-    marginTop: 15
+    marginTop: 15,
   },
   title: {
     color: "gray",
     textAlign: "center",
-    fontSize: 20
+    fontSize: 20,
   },
   buttonImage: {
     width: 200,
