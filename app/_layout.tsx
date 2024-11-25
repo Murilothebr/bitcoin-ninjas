@@ -8,7 +8,7 @@ export default function _layout() {
         name="index"
         options={{
           drawerLabel: "Home",
-          title: "Home",
+          title: "Lojas",
         }}
       />
       <Drawer.Screen

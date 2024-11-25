@@ -9,109 +9,120 @@ import {
 import FormInput from "./FormInput";
 import FormButtonCreate from "./FormButtonCreate";
 import FormButtonCancel from "./FormButtonCancel";
-import addCar from "@/services/hooks/addCar";
-import updateCar from "@/services/hooks/editarCar";
+import addStore from "@/services/hooks/addStore";
+import updateStore from "@/services/hooks/editarStore";
+import { router } from "expo-router";
 
 interface FormModalProps {
   isEdit: boolean;
-  currentCar?: Cars;
+  currentStore?: Store;
   modalVisible: boolean;
 }
 
 const FormModal: React.FC<FormModalProps> = ({
   isEdit,
-  currentCar,
+  currentStore,
   modalVisible,
 }) => {
   const [isModalVisible, setModalVisible] = useState<boolean>(modalVisible);
 
-  const [carData, setCarData] = useState<Omit<Cars, "id"> & { id?: number }>({
-    id: currentCar?.id || null,
-    brand: currentCar?.brand || "",
-    price: currentCar?.price || "",
-    model: currentCar?.model || "",
-    year: currentCar?.year || "",
+  const [storeData, setStoreData] = useState<
+    Omit<Store, "id"> & { id?: number }
+  >({
+    id: currentStore?.id || null,
+    name: currentStore?.name || "",
+    location: currentStore?.location || "",
+    contact: currentStore?.contact || "",
+    currencies: currentStore?.currencies || null,
   });
 
-  const handleAddCar = async () => {
+  const handleAddStore = async () => {
     try {
-      await addCar(carData);
-      setCarData({
-        id: undefined,
-        brand: "",
-        price: "",
-        model: "",
-        year: "",
+      await addStore(storeData);
+      setStoreData({
+        name: "",
+        location: "",
+        contact: "",
+        currencies: null,
       });
+
+      router.push(`/`);
     } catch (error) {
-      console.error("Failed to add car:", error);
+      console.error("Failed to add store:", error);
     }
   };
 
-  const handleEditCar = async () => {
+  const handleEditStore = async () => {
     try {
-      if (carData.id) {
-        await updateCar(currentCar as Cars);
+      if (storeData.id) {
+        await updateStore(currentStore as Store);
         setModalVisible(false);
       }
     } catch (error) {
-      console.error("Failed to edit car:", error);
+      console.error("Failed to edit store:", error);
     }
   };
 
   useEffect(() => {
-    if (currentCar) {
-      setCarData({
-        id: currentCar.id,
-        brand: currentCar.brand,
-        price: currentCar.price,
-        model: currentCar.model,
-        year: currentCar.year,
+    if (currentStore) {
+      setStoreData({
+        id: currentStore?.id || null,
+        name: currentStore?.name || "",
+        location: currentStore?.location || "",
+        contact: currentStore?.contact || "",
+        currencies: currentStore?.currencies || null,
       });
     }
-  }, [currentCar]);
+  }, [currentStore]);
+
+  useEffect(() => {
+    console.log("modalVisible", isModalVisible);
+  }, [isModalVisible]);
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={isModalVisible}
-      onRequestClose={() => setModalVisible(!modalVisible)}
-    >
+    <Modal animationType="slide" transparent={true} visible={isModalVisible}>
       <TouchableNativeFeedback onPress={Keyboard.dismiss}>
         <View style={styles.modalView}>
           <FormInput
-            label="Marca"
-            value={carData.brand}
-            onChangeText={(text) => setCarData({ ...carData, brand: text })}
+            label="Nome do estabelecimento"
+            value={storeData.name}
+            onChangeText={(text) => setStoreData({ ...storeData, name: text })}
           />
           <FormInput
-            label="Modelo"
-            value={carData.model}
-            onChangeText={(text) => setCarData({ ...carData, model: text })}
+            label="Cidade"
+            value={storeData.location}
+            onChangeText={(text) =>
+              setStoreData({ ...storeData, location: text })
+            }
           />
           <FormInput
-            label="Preço (Mil / BRL)"
-            value={carData.price}
-            onChangeText={(text) => setCarData({ ...carData, price: text })}
+            label="Contato"
+            value={storeData.contact}
+            onChangeText={(text) =>
+              setStoreData({ ...storeData, contact: text })
+            }
           />
           <FormInput
-            label="Ano fabricação"
-            value={carData.year.toString()}
-            onChangeText={(text) => setCarData({ ...carData, year: text })}
+            label="Moedas aceitas"
+            value={storeData.currencies?.join(", ")}
+            onChangeText={(text) =>
+              setStoreData({
+                ...storeData,
+                currencies: text.split(",").map((item) => item.trim()),
+              })
+            }
           />
 
           <View style={styles.buttonContainer}>
             <FormButtonCreate
-              title={isEdit ? "Edit Car" : "Add Car"}
-              onPress={isEdit ? handleEditCar : handleAddCar}
+              title={isEdit ? "Edit Store" : "Add Store"}
+              onPress={isEdit ? handleEditStore : handleAddStore}
             />
-            {isEdit && (
-              <FormButtonCancel
-                title="Cancel"
-                onPress={() => setModalVisible(false)}
-              />
-            )}
+
+            <FormButtonCancel
+              title="Cancel"
+              onPress={() => setModalVisible(false)}
+            />
           </View>
         </View>
       </TouchableNativeFeedback>

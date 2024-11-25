@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,54 +7,61 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import getCars from "@/services/hooks/getCars";
-import deleteCars from "@/services/hooks/deleteCar";
-import organizeCarsIntoSections from "@/services/carsService";
+import getStores from "@/services/hooks/getStores";
+import deleteStores from "@/services/hooks/deleteStore";
 import { FontAwesome } from "@expo/vector-icons";
 import FormModal from "@/components/form/FormModal";
+import organizeStoreIntoSections from "@/services/storeService";
+import { useEffect, useState } from "react";
 
 export default function index() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [cars, setCars] = useState<any[]>([]);
+  const [stores, setStores] = useState<any[]>([]);
 
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [currentCar, setCurrentCar] = useState<Cars | undefined>(undefined);
+  const [currentStore, setCurrentStore] = useState<Store | undefined>(
+    undefined
+  );
 
   const onChangeSearch = (query: any) => {
     setSearchQuery(query);
   };
 
   useEffect(() => {
-    const fetchCars = async () => {
+    const fetchStores = async () => {
       try {
-        const carsData = await getCars();
-        setCars(carsData);
+        const storesData = await getStores();
+        setStores(storesData);
       } catch (error) {
-        console.error("Failed to fetch cars data:", error);
+        console.error("Failed to fetch stores data:", error);
       }
     };
 
-    fetchCars();
+    fetchStores();
   }, []);
 
+  useEffect(() => {
+    console.log(modalVisible);
+  }, [modalVisible, setModalVisible]);
+
   const handleRefresh = async () => {
-    const cars = await getCars();
-    setCars(cars);
+    const stores = await getStores();
+    setStores(stores);
   };
 
   const handleDelete = async (id: number) => {
     try {
-      await deleteCars(id);
-      setCars(cars.filter((car) => car.id !== id));
+      await deleteStores(id);
+      setStores(stores.filter((store) => store.id !== id));
     } catch (error) {
-      console.error("Failed to delete car:", error);
+      console.error("Failed to delete store:", error);
     }
   };
 
-  const openEditModal = (car: Cars) => {
-    setCurrentCar(car);
+  const openEditModal = async (store: Store) => {
     setModalVisible(true);
-    handleRefresh();
+    setCurrentStore(store);
+    await handleRefresh();
   };
 
   return (
@@ -71,14 +77,15 @@ export default function index() {
 
         <View style={{ marginBottom: 100 }}>
           <SectionList
-            sections={organizeCarsIntoSections(cars).filter((data) =>
+            sections={organizeStoreIntoSections(stores).filter((data) =>
               data.title.toUpperCase().includes(searchQuery.toUpperCase())
             )}
             renderItem={({ item }) => (
               <View style={styles.item}>
-                <Text style={styles.model}>{item.model}</Text>
-                <Text style={styles.carPrice}>{item.price},000R$</Text>
-                <Text style={styles.year}>{item.year}</Text>
+                <Text style={styles.model}>{item.name}</Text>
+                <Text style={styles.storePrice}>{item.location}</Text>
+                <Text style={styles.year}>{item.contact}</Text>
+                <Text style={styles.year}>{item.currencies}</Text>
                 <TouchableOpacity onPress={() => handleDelete(item.id)}>
                   <FontAwesome name="trash" size={15} color="red" />
                 </TouchableOpacity>
@@ -99,7 +106,7 @@ export default function index() {
         {modalVisible && (
           <FormModal
             isEdit={true}
-            currentCar={currentCar}
+            currentStore={currentStore}
             modalVisible={true}
           />
         )}
@@ -137,10 +144,10 @@ const styles = StyleSheet.create({
     fontSize: 30,
     textAlign: "center",
   },
-  carPrice: {
+  storePrice: {
     fontSize: 20,
     textAlign: "center",
-    color: "lightgreen",
+    color: "gray",
     fontWeight: "bold",
   },
   year: {
@@ -148,7 +155,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "gray",
   },
-  carId: {
+  storeId: {
     fontSize: 10,
     textAlign: "center",
     color: "lightgray",
