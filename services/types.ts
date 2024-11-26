@@ -1,7 +1,7 @@
-interface Cars {
+interface Store {
     id: any;
-    price: string;
-    brand: string;
-    model: string;
-    year: string;
+    name: string;
+    location: string;
+    contact: string;
+    currencies: string[] | null;
 }

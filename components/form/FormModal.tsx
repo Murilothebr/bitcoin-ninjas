@@ -1,140 +1,121 @@
-import { useEffect, useState } from "react";
-import {
-  Modal,
-  View,
-  TouchableNativeFeedback,
-  Keyboard,
-  StyleSheet,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet } from "react-native";
 import FormInput from "./FormInput";
 import FormButtonCreate from "./FormButtonCreate";
 import FormButtonCancel from "./FormButtonCancel";
-import addCar from "@/services/hooks/addCar";
-import updateCar from "@/services/hooks/editarCar";
+import addStore from "@/services/hooks/addStore";
+import updateStore from "@/services/hooks/editarStore";
 
 interface FormModalProps {
   isEdit: boolean;
-  currentCar?: Cars;
+  currentStore?: Store;
   modalVisible: boolean;
+  onClose: () => void;
 }
 
 const FormModal: React.FC<FormModalProps> = ({
   isEdit,
-  currentCar,
+  currentStore,
   modalVisible,
+  onClose,
 }) => {
-  const [isModalVisible, setModalVisible] = useState<boolean>(modalVisible);
-
-  const [carData, setCarData] = useState<Omit<Cars, "id"> & { id?: number }>({
-    id: currentCar?.id || null,
-    brand: currentCar?.brand || "",
-    price: currentCar?.price || "",
-    model: currentCar?.model || "",
-    year: currentCar?.year || "",
+  const [storeData, setStoreData] = useState<Store>({
+    id: currentStore?.id || null,
+    name: currentStore?.name || "",
+    location: currentStore?.location || "",
+    contact: currentStore?.contact || "",
+    currencies: currentStore?.currencies || null,
   });
 
-  const handleAddCar = async () => {
-    try {
-      await addCar(carData);
-      setCarData({
-        id: undefined,
-        brand: "",
-        price: "",
-        model: "",
-        year: "",
+  // Update storeData when currentStore changes
+  useEffect(() => {
+    if (currentStore) {
+      setStoreData({
+        id: currentStore.id || null,
+        name: currentStore.name || "",
+        location: currentStore.location || "",
+        contact: currentStore.contact || "",
+        currencies: currentStore.currencies || null,
       });
+    }
+  }, [currentStore]);
+
+  // Handle adding a store
+  const handleAddStore = async () => {
+    try {
+      await addStore(storeData); // Assuming this is the service to add the store
+      setStoreData({
+        id: null,
+        name: "",
+        location: "",
+        contact: "",
+        currencies: null,
+      });
+      onClose(); // Close modal and refresh parent
     } catch (error) {
-      console.error("Failed to add car:", error);
+      console.error("Failed to add store:", error);
     }
   };
 
-  const handleEditCar = async () => {
+  // Handle editing a store
+  const handleEditStore = async () => {
     try {
-      if (carData.id) {
-        await updateCar(currentCar as Cars);
-        setModalVisible(false);
+      if (storeData.id) {
+        await updateStore(storeData); // Assuming this is the service to update the store
+        onClose(); // Close modal and refresh parent
       }
     } catch (error) {
-      console.error("Failed to edit car:", error);
+      console.error("Failed to edit store:", error);
     }
   };
 
-  useEffect(() => {
-    if (currentCar) {
-      setCarData({
-        id: currentCar.id,
-        brand: currentCar.brand,
-        price: currentCar.price,
-        model: currentCar.model,
-        year: currentCar.year,
-      });
-    }
-  }, [currentCar]);
-
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={isModalVisible}
-      onRequestClose={() => setModalVisible(!modalVisible)}
-    >
-      <TouchableNativeFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.modalView}>
-          <FormInput
-            label="Marca"
-            value={carData.brand}
-            onChangeText={(text) => setCarData({ ...carData, brand: text })}
-          />
-          <FormInput
-            label="Modelo"
-            value={carData.model}
-            onChangeText={(text) => setCarData({ ...carData, model: text })}
-          />
-          <FormInput
-            label="Preço (Mil / BRL)"
-            value={carData.price}
-            onChangeText={(text) => setCarData({ ...carData, price: text })}
-          />
-          <FormInput
-            label="Ano fabricação"
-            value={carData.year.toString()}
-            onChangeText={(text) => setCarData({ ...carData, year: text })}
-          />
+    <View style={styles.modalView}>
+      <FormInput
+        label="Nome da loja"
+        value={storeData.name}
+        onChangeText={(text) => setStoreData({ ...storeData, name: text })}
+      />
+      <FormInput
+        label="Cidade"
+        value={storeData.location}
+        onChangeText={(text) => setStoreData({ ...storeData, location: text })}
+      />
+      <FormInput
+        label="Contato"
+        value={storeData.contact}
+        onChangeText={(text) => setStoreData({ ...storeData, contact: text })}
+      />
+      <FormInput
+        label="Moedas aceitas (separar por virgula)"
+        value={storeData.currencies?.join(", ") || ""}
+        onChangeText={(text) =>
+          setStoreData({
+            ...storeData,
+            currencies: text.split(",").map((item) => item.trim()),
+          })
+        }
+      />
 
-          <View style={styles.buttonContainer}>
-            <FormButtonCreate
-              title={isEdit ? "Edit Car" : "Add Car"}
-              onPress={isEdit ? handleEditCar : handleAddCar}
-            />
-            {isEdit && (
-              <FormButtonCancel
-                title="Cancel"
-                onPress={() => setModalVisible(false)}
-              />
-            )}
-          </View>
-        </View>
-      </TouchableNativeFeedback>
-    </Modal>
+      <View style={styles.buttonContainer}>
+        <FormButtonCreate
+          title={isEdit ? "Edit Store" : "Add Store"}
+          onPress={isEdit ? handleEditStore : handleAddStore}
+        />
+        <FormButtonCancel
+          title="Cancel"
+          onPress={onClose} // Close modal via parent's onClose handler
+        />
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   modalView: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 22,
-    backgroundColor: "white",
-    padding: 35,
-    shadowColor: "white",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    padding: 20,
   },
   buttonContainer: {
     flexDirection: "row",

@@ -4,7 +4,12 @@ import { View } from "react-native";
 export default function createNew() {
   return (
     <View>
-      <FormModal isEdit={false} currentCar={undefined} modalVisible={true} />
+      <FormModal
+        isEdit={false}
+        currentStore={undefined}
+        modalVisible={true}
+        onClose={() => {}}
+      />
     </View>
   );
 }

@@ -5,12 +5,13 @@ export default function _layout() {
   return (
     <Drawer>
       <Drawer.Screen
-        name="index"
+        name="home"
         options={{
           drawerLabel: "Home",
-          title: "Home",
+          title: "Lojas",
         }}
       />
+
       <Drawer.Screen
         name="about"
         options={{
@@ -28,8 +29,11 @@ export default function _layout() {
       />
 
       <Drawer.Screen
-        name="login"
-        options={{ drawerItemStyle: { display: "none" } }}
+        name="index"
+        options={{
+          drawerLabel: "LogIn / Logout",
+          title: "LogIn / Logout",
+        }}
       />
 
       <Drawer.Screen
