@@ -12,7 +12,7 @@ const getStores = async (): Promise<Store[]> => {
                 name: storesData[key].name,
                 location: storesData[key].location,
                 contact: storesData[key].contact,
-                currencies: null,
+                currencies: storesData[key].currencies,
             }));
             return storesList;
         } else {

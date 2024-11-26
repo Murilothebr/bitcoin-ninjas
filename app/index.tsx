@@ -1,175 +1,92 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  SectionList,
-  SafeAreaView,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
-import getStores from "@/services/hooks/getStores";
-import deleteStores from "@/services/hooks/deleteStore";
-import { FontAwesome } from "@expo/vector-icons";
-import FormModal from "@/components/form/FormModal";
-import organizeStoreIntoSections from "@/services/storeService";
-import { useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { Link, useRouter } from "expo-router";
+import FormInput from "@/components/form/FormInput";
+import FormButton from "@/components/form/FormButton";
+import { Spacing } from "@/consts/spacing";
+import FullScreen from "@/components/containers/FullScreen";
+import { Image } from "expo-image";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebaseConfig";
+import FormButtonCreate from "@/components/form/FormButtonCreate";
 
-export default function index() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [stores, setStores] = useState<any[]>([]);
+export default function Login() {
+  const router = useRouter();
 
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [currentStore, setCurrentStore] = useState<Store | undefined>(
-    undefined
-  );
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
-  const onChangeSearch = (query: any) => {
-    setSearchQuery(query);
-  };
-
-  useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        const storesData = await getStores();
-        setStores(storesData);
-      } catch (error) {
-        console.error("Failed to fetch stores data:", error);
-      }
-    };
-
-    fetchStores();
-  }, []);
-
-  useEffect(() => {
-    console.log(modalVisible);
-  }, [modalVisible, setModalVisible]);
-
-  const handleRefresh = async () => {
-    const stores = await getStores();
-    setStores(stores);
-  };
-
-  const handleDelete = async (id: number) => {
+  const handleLogin = async () => {
     try {
-      await deleteStores(id);
-      setStores(stores.filter((store) => store.id !== id));
-    } catch (error) {
-      console.error("Failed to delete store:", error);
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("User logged in successfully");
+
+      router.replace("/home");
+    } catch (error: any) {
+      let errorMessage = "An error occurred";
+      if (error.code === "auth/user-not-found") {
+        errorMessage = "No user found with this email";
+      } else if (error.code === "auth/wrong-password") {
+        errorMessage = "Incorrect password";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Invalid email address";
+      }
+      setMessage(errorMessage);
     }
   };
 
-  const openEditModal = async (store: Store) => {
-    setModalVisible(true);
-    setCurrentStore(store);
-    await handleRefresh();
-  };
+  const blurhash =
+    "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
   return (
-    <View style={styles.view}>
-      <SafeAreaView style={styles.container}>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Cade..."
-          onChangeText={onChangeSearch}
-          value={searchQuery}
-          placeholderTextColor="black"
-        />
+    <FullScreen>
+      <Image
+        source={{
+          uri: "https://www.lojacarros.com.br/static/images/loja-carros.png",
+        }}
+        style={styles.logo}
+        placeholder={blurhash}
+      />
 
-        <View style={{ marginBottom: 100 }}>
-          <SectionList
-            sections={organizeStoreIntoSections(stores).filter((data) =>
-              data.title.toUpperCase().includes(searchQuery.toUpperCase())
-            )}
-            renderItem={({ item }) => (
-              <View style={styles.item}>
-                <Text style={styles.model}>{item.name}</Text>
-                <Text style={styles.storePrice}>{item.location}</Text>
-                <Text style={styles.year}>{item.contact}</Text>
-                <Text style={styles.year}>{item.currencies}</Text>
-                <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                  <FontAwesome name="trash" size={15} color="red" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => openEditModal(item)}
-                  style={styles.editButton}
-                >
-                  <FontAwesome name="pencil" size={15} color="gray" />
-                </TouchableOpacity>
-              </View>
-            )}
-            renderSectionHeader={({ section: { title } }) => (
-              <Text style={styles.header}>{title}</Text>
-            )}
-          />
-        </View>
+      <FormInput label="Username" value={email} onChangeText={setEmail} />
 
-        {modalVisible && (
-          <FormModal
-            isEdit={true}
-            currentStore={currentStore}
-            modalVisible={true}
-          />
-        )}
-      </SafeAreaView>
-    </View>
+      <FormInput
+        label="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+
+      <FormButtonCreate onPress={handleLogin} title="Login!" />
+
+      <Link style={styles.registerLink} href="/register">
+        Novo por aqui? Registre-se!
+      </Link>
+    </FullScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "white",
+  imageContainer: {
+    justifyContent: "center",
+    alignContent: "center",
   },
-  view: {
-    backgroundColor: "white",
-  },
-  searchBar: {
-    padding: 10,
-    backgroundColor: "white",
-    margin: 10,
-    borderRadius: 5,
-    color: "black",
-    borderWidth: 1,
-    borderColor: "gray",
-  },
-  item: {
-    alignItems: "center",
-  },
-  header: {
-    fontSize: 40,
-    textAlign: "center",
-    fontWeight: "bold",
-    padding: 20,
-  },
-  model: {
-    fontSize: 30,
-    textAlign: "center",
-  },
-  storePrice: {
-    fontSize: 20,
-    textAlign: "center",
-    color: "gray",
-    fontWeight: "bold",
-  },
-  year: {
-    fontSize: 12,
-    textAlign: "center",
-    color: "gray",
-  },
-  storeId: {
-    fontSize: 10,
-    textAlign: "center",
-    color: "lightgray",
-  },
-  deleteButton: {
-    color: "red",
-  },
-  addButton: {
-    marginTop: 15,
+  logo: {
+    width: 200,
+    height: 150,
+    marginBottom: Spacing.md,
     alignSelf: "center",
   },
-  editButton: {
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 10,
+  image: {
+    flex: 1,
+    width: "100%",
+    height: 10,
+    backgroundColor: "#0553",
+  },
+  registerLink: {
+    marginTop: Spacing.md,
+    fontSize: 12,
+    textAlign: "center",
   },
 });
