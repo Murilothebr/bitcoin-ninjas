@@ -90,7 +90,7 @@ export default function index() {
         {modalVisible && (
           <FormModal
             isEdit={!!currentStore}
-            currentStore={currentStore}
+            currentStore={currentStore as Store}
             modalVisible={modalVisible}
             onClose={() => {
               setModalVisible(false);

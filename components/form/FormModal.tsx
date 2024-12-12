@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, Controller } from "react-hook-form";
 import FormInput from "./FormInput";
 import FormButtonCreate from "./FormButtonCreate";
 import FormButtonCancel from "./FormButtonCancel";
+import AppMultiSelect from "./AppMultiSelect";
 import addStore from "@/services/hooks/addStore";
 import updateStore from "@/services/hooks/editarStore";
 
@@ -13,98 +17,143 @@ interface FormModalProps {
   onClose: () => void;
 }
 
+const currenciesOptions = [
+  { label: "Bitcoin Onchain", value: "Bitcoin Onchain" },
+  { label: "Bitcoin LN", value: "Bitcoin LN" },
+  { label: "Ethereum", value: "Ethereum" },
+  { label: "Monero", value: "Monero" },
+];
+
+const storeSchema = z.object({
+  name: z.string().min(1, "Nome da loja é obrigatório."),
+  location: z.string().min(1, "Cidade é obrigatória."),
+  contact: z.string().min(1, "Contato é obrigatório."),
+  currencies: z
+    .array(z.string())
+    .nonempty("Selecione pelo menos uma moeda aceita."),
+});
+
 const FormModal: React.FC<FormModalProps> = ({
   isEdit,
   currentStore,
-  modalVisible,
   onClose,
 }) => {
-  const [storeData, setStoreData] = useState<Store>({
-    id: currentStore?.id || null,
-    name: currentStore?.name || "",
-    location: currentStore?.location || "",
-    contact: currentStore?.contact || "",
-    currencies: currentStore?.currencies || null,
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<Store>({
+    resolver: zodResolver(storeSchema),
+    defaultValues: {
+      id: currentStore?.id || null,
+      name: currentStore?.name || "",
+      location: currentStore?.location || "",
+      contact: currentStore?.contact || "",
+      description: currentStore?.description || "",
+      currencies: currentStore?.currencies || [],
+    },
   });
 
-  // Update storeData when currentStore changes
   useEffect(() => {
     if (currentStore) {
-      setStoreData({
+      reset({
         id: currentStore.id || null,
         name: currentStore.name || "",
         location: currentStore.location || "",
         contact: currentStore.contact || "",
-        currencies: currentStore.currencies || null,
+        description: currentStore.description || "",
+        currencies: currentStore.currencies || [],
       });
     }
-  }, [currentStore]);
+  }, [currentStore, reset]);
 
-  // Handle adding a store
-  const handleAddStore = async () => {
+  const onSubmit = async (data: Store) => {
     try {
-      await addStore(storeData); // Assuming this is the service to add the store
-      setStoreData({
-        id: null,
-        name: "",
-        location: "",
-        contact: "",
-        currencies: null,
-      });
-      onClose(); // Close modal and refresh parent
-    } catch (error) {
-      console.error("Failed to add store:", error);
-    }
-  };
-
-  // Handle editing a store
-  const handleEditStore = async () => {
-    try {
-      if (storeData.id) {
-        await updateStore(storeData); // Assuming this is the service to update the store
-        onClose(); // Close modal and refresh parent
+      if (isEdit) {
+        if (data.id) await updateStore(data);
+      } else {
+        await addStore(data);
       }
+      reset();
+      onClose();
     } catch (error) {
-      console.error("Failed to edit store:", error);
+      console.error("Failed to save store:", error);
     }
   };
 
   return (
     <View style={styles.modalView}>
-      <FormInput
-        label="Nome da loja"
-        value={storeData.name}
-        onChangeText={(text) => setStoreData({ ...storeData, name: text })}
+      <Controller
+        name="name"
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <FormInput
+            label="Nome da loja"
+            value={value}
+            onChangeText={onChange}
+            error={errors.name?.message}
+          />
+        )}
       />
-      <FormInput
-        label="Cidade"
-        value={storeData.location}
-        onChangeText={(text) => setStoreData({ ...storeData, location: text })}
+
+      <Controller
+        name="location"
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <FormInput
+            label="Cidade"
+            value={value}
+            onChangeText={onChange}
+            error={errors.location?.message}
+          />
+        )}
       />
-      <FormInput
-        label="Contato"
-        value={storeData.contact}
-        onChangeText={(text) => setStoreData({ ...storeData, contact: text })}
+
+      <Controller
+        name="contact"
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <FormInput
+            label="Contato"
+            value={value}
+            onChangeText={onChange}
+            error={errors.contact?.message}
+          />
+        )}
       />
-      <FormInput
-        label="Moedas aceitas (separar por virgula)"
-        value={storeData.currencies?.join(", ") || ""}
-        onChangeText={(text) =>
-          setStoreData({
-            ...storeData,
-            currencies: text.split(",").map((item) => item.trim()),
-          })
-        }
+
+      <Controller
+        name="description"
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <FormInput
+            label="Description"
+            value={value}
+            onChangeText={onChange}
+            error={errors.contact?.message}
+          />
+        )}
+      />
+
+      <Controller
+        name="currencies"
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <AppMultiSelect
+            label="Moedas aceitas"
+            options={currenciesOptions}
+            selectedValues={value ?? []}
+            onValueChange={onChange}
+            error={errors.currencies?.message}
+          />
+        )}
       />
 
       <View style={styles.buttonContainer}>
         <FormButtonCreate
           title={isEdit ? "Edit Store" : "Add Store"}
-          onPress={isEdit ? handleEditStore : handleAddStore}
-        />
-        <FormButtonCancel
-          title="Cancel"
-          onPress={onClose} // Close modal via parent's onClose handler
+          onPress={handleSubmit(onSubmit)}
         />
       </View>
     </View>
@@ -118,8 +167,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     marginTop: 15,
     width: "80%",
   },

@@ -8,6 +8,7 @@ const updateStore = async (store: Store): Promise<void> => {
       name: store.name,
       location: store.location,
       contact: store.contact,
+      description: store.description,
       currencies: store.currencies,
     });
     console.log('Store updated successfully');
