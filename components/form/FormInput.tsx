@@ -9,11 +9,12 @@ import { useState } from "react";
 import { Colors } from "@/consts/colors";
 import { Spacing } from "@/consts/spacing";
 
-type FormInput = {
+type FormInputProps = {
   label?: string;
+  error?: string; // Add error prop
 } & TextInputProps;
 
-export default function FormInput({ label, ...rest }: FormInput) {
+export default function FormInput({ label, error, ...rest }: FormInputProps) {
   const [focus, setFocus] = useState(false);
 
   return (
@@ -23,9 +24,15 @@ export default function FormInput({ label, ...rest }: FormInput) {
       )}
       <TextInput
         {...rest}
+        style={[
+          styles.input,
+          focus && styles.inputFocus,
+          error && styles.inputError,
+        ]}
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
       />
+      {error && <Text style={styles.error}>{error}</Text>} 
     </View>
   );
 }
@@ -33,7 +40,7 @@ export default function FormInput({ label, ...rest }: FormInput) {
 const styles = StyleSheet.create({
   container: {
     marginTop: Spacing.mt,
-    padding: 8, 
+    padding: 8,
     width: "80%",
     borderBottomColor: "grey",
     borderBottomWidth: 1,
@@ -49,26 +56,20 @@ const styles = StyleSheet.create({
   focusContainer: {
     borderBottomColor: Colors.primary,
   },
-  modalView: {
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    flex: 1,
-    justifyContent: "center",
+  input: {
+    fontSize: 16,
+    paddingVertical: 5,
+    color: "black",
   },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 15,
-    width: "100%",
+  inputFocus: {
+    borderBottomColor: Colors.primary,
+  },
+  inputError: {
+    borderBottomColor: "red",
+  },
+  error: {
+    fontSize: 12,
+    color: "red",
+    marginTop: 5,
   },
 });
