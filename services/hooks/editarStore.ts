@@ -6,8 +6,10 @@ const updateStore = async (store: Store): Promise<void> => {
   try {
     await update(dbRef, {
       name: store.name,
+      city: store.city,
       location: store.location,
       contact: store.contact,
+      segment: store.segment,
       description: store.description,
       currencies: store.currencies,
     });

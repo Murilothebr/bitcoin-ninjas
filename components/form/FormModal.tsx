@@ -5,13 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import FormInput from "./FormInput";
 import FormButtonCreate from "./FormButtonCreate";
-import FormButtonCancel from "./FormButtonCancel";
 import AppMultiSelect from "./AppMultiSelect";
 import addStore from "@/services/hooks/addStore";
-import updateStore from "@/services/hooks/editarStore";
 
 interface FormModalProps {
-  isEdit: boolean;
   currentStore?: Store;
   modalVisible: boolean;
   onClose: () => void;
@@ -28,16 +25,14 @@ const storeSchema = z.object({
   name: z.string().min(1, "Nome da loja é obrigatório."),
   location: z.string().min(1, "Cidade é obrigatória."),
   contact: z.string().min(1, "Contato é obrigatório."),
+  city: z.string().min(1, "Cidade é obrigatório."),
+  segment: z.string().min(1, "Seguimento é obrigatório."),
   currencies: z
     .array(z.string())
     .nonempty("Selecione pelo menos uma moeda aceita."),
 });
 
-const FormModal: React.FC<FormModalProps> = ({
-  isEdit,
-  currentStore,
-  onClose,
-}) => {
+const FormModal: React.FC<FormModalProps> = ({ currentStore, onClose }) => {
   const {
     control,
     handleSubmit,
@@ -48,9 +43,11 @@ const FormModal: React.FC<FormModalProps> = ({
     defaultValues: {
       id: currentStore?.id || null,
       name: currentStore?.name || "",
+      city: currentStore?.city || "",
       location: currentStore?.location || "",
       contact: currentStore?.contact || "",
       description: currentStore?.description || "",
+      segment: currentStore?.segment || "",
       currencies: currentStore?.currencies || [],
     },
   });
@@ -60,9 +57,11 @@ const FormModal: React.FC<FormModalProps> = ({
       reset({
         id: currentStore.id || null,
         name: currentStore.name || "",
+        city: currentStore.city || "",
         location: currentStore.location || "",
         contact: currentStore.contact || "",
         description: currentStore.description || "",
+        segment: currentStore?.segment || "",
         currencies: currentStore.currencies || [],
       });
     }
@@ -70,11 +69,7 @@ const FormModal: React.FC<FormModalProps> = ({
 
   const onSubmit = async (data: Store) => {
     try {
-      if (isEdit) {
-        if (data.id) await updateStore(data);
-      } else {
-        await addStore(data);
-      }
+      await addStore(data);
       reset();
       onClose();
     } catch (error) {
@@ -98,11 +93,24 @@ const FormModal: React.FC<FormModalProps> = ({
       />
 
       <Controller
-        name="location"
+        name="city"
         control={control}
         render={({ field: { onChange, value } }) => (
           <FormInput
             label="Cidade"
+            value={value}
+            onChangeText={onChange}
+            error={errors.city?.message}
+          />
+        )}
+      />
+
+      <Controller
+        name="location"
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <FormInput
+            label="localização"
             value={value}
             onChangeText={onChange}
             error={errors.location?.message}
@@ -128,10 +136,10 @@ const FormModal: React.FC<FormModalProps> = ({
         control={control}
         render={({ field: { onChange, value } }) => (
           <FormInput
-            label="Description"
+            label="Descrição"
             value={value}
             onChangeText={onChange}
-            error={errors.contact?.message}
+            error={errors.description?.message}
           />
         )}
       />
@@ -152,7 +160,7 @@ const FormModal: React.FC<FormModalProps> = ({
 
       <View style={styles.buttonContainer}>
         <FormButtonCreate
-          title={isEdit ? "Edit Store" : "Add Store"}
+          title={"Adicionar loja"}
           onPress={handleSubmit(onSubmit)}
         />
       </View>
