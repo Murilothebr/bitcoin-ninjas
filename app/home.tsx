@@ -73,7 +73,7 @@ export default function index() {
       <SafeAreaView style={styles.container}>
         <TextInput
           style={styles.searchBar}
-          placeholder="Search..."
+          placeholder="Pesquisar por cidade..."
           onChangeText={(query) => setSearchQuery(query)}
           value={searchQuery}
           placeholderTextColor="black"
@@ -115,7 +115,7 @@ export default function index() {
           >
             <View style={styles.infoModal}>
               <View style={styles.infoContent}>
-                <Text style={styles.infoTitle}>Store Details</Text>
+                <Text style={styles.infoTitle}>Detalhes da Loja</Text>
                 <View style={styles.detailContainer}>
                   <Text style={styles.label}>Nome</Text>
                   <Text style={styles.value}>{currentStore.name}</Text>
@@ -130,12 +130,6 @@ export default function index() {
                     {currentStore.currencies?.join(", ") || "N/A"}
                   </Text>
                 </View>
-              </View>{" "}
-              <View style={styles.detailContainer}>
-                <Text style={styles.label}>Descricao</Text>
-                <Text style={styles.value}>
-                  {currentStore.description || "N/A"}
-                </Text>
                 <View style={styles.detailContainer}>
                   <Text style={styles.label}>Cidade</Text>
                   <Text style={styles.value}>{currentStore.city || "N/A"}</Text>
@@ -297,7 +291,7 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 15,
     alignSelf: "center",
-    backgroundColor: "red",
+    backgroundColor: "#007BFF",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,

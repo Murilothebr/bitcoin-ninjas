@@ -13,14 +13,6 @@ export default function _layout() {
       />
 
       <Drawer.Screen
-        name="about"
-        options={{
-          drawerLabel: "About",
-          title: "About",
-        }}
-      />
-
-      <Drawer.Screen
         name="createNew"
         options={{
           drawerLabel: "Create New",
@@ -31,8 +23,16 @@ export default function _layout() {
       <Drawer.Screen
         name="index"
         options={{
-          drawerLabel: "LogIn / Logout",
+          drawerLabel: "Login / Logout",
           title: "LogIn / Logout",
+        }}
+      />
+
+      <Drawer.Screen
+        name="about"
+        options={{
+          drawerLabel: "About",
+          title: "About",
         }}
       />
 

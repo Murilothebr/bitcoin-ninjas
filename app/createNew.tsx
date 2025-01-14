@@ -3,9 +3,8 @@ import { View } from "react-native";
 
 export default function createNew() {
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: "white" }}>
       <FormModal
-        isEdit={false}
         currentStore={undefined}
         modalVisible={true}
         onClose={() => {}}
