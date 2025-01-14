@@ -12,6 +12,9 @@ const getStores = async (): Promise<Store[]> => {
                 name: storesData[key].name,
                 location: storesData[key].location,
                 contact: storesData[key].contact,
+                city: storesData[key].city,
+                segment: storesData[key].segment,
+                description: storesData[key].description,
                 currencies: storesData[key].currencies,
             }));
             return storesList;

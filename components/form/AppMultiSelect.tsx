@@ -85,12 +85,9 @@ const styles = StyleSheet.create({
   },
   selectBox: {
     flexDirection: "row",
-    borderWidth: 0.2,
-    borderColor: "gray",
-    borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 12,
-    backgroundColor: "#F9F9F9",
+    backgroundColor: "white",
   },
   selectBoxError: {
     borderColor: "red",
