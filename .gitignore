@@ -5,7 +5,7 @@ node_modules/
 
 #Firebase
 //FirebaseConfig.ts
-firebaseConfig.ts
+firebaseEnv.ts
 # Expo
 .expo/
 dist/
