@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "TopCar",
+    "name": "BitcoinNinjas",
     "slug": "TopCar",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "TopCar",
+    "scheme": "BitcoinNinjas",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -22,7 +22,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.murilothebr.btcninjas"
     },
     "web": {
       "bundler": "metro",
@@ -35,6 +36,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "c02efeae-ab60-4087-ad7e-a21173422cca"
+      }
     }
   }
 }
